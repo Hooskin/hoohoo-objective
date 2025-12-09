@@ -1,0 +1,19 @@
+{
+  "id": "hoohoo-objective",
+  "title": "HooHoo - Objective",
+  "version": "1.0.0",
+  "compatibility": {
+    "minimum": "13",
+    "verified": "13"
+  },
+  "flags": {
+    "canUpload": true
+  },
+  "description": "Effet de transition de type Final Fantasy lors de la création d'une rencontre.",
+  "scripts": [
+    "scripts/ff_transition.js"
+  ],
+  "styles": [
+    "styles/ff_transition.css"
+  ]
+}

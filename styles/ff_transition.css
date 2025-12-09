@@ -1,0 +1,53 @@
+
+.hoohoo-ff-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999999;
+  overflow: hidden;
+}
+
+.hoohoo-ff-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 25vh;
+  background: #000;
+  transform: translate3d(0,-100%,0);
+  z-index: 10000000;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+.hoohoo-ff-top { top: 0; animation: hoohoo-ff-bar-top-in 0.4s cubic-bezier(.2,.9,.2,1) forwards, hoohoo-ff-bar-top-out 0.6s cubic-bezier(.2,.9,.2,1) 1.0s forwards; }
+.hoohoo-ff-bottom { bottom: 0; transform: translate3d(0,100%,0); animation: hoohoo-ff-bar-bottom-in 0.4s cubic-bezier(.2,.9,.2,1) forwards, hoohoo-ff-bar-bottom-out 0.6s cubic-bezier(.2,.9,.2,1) 1.0s forwards; }
+
+.hoohoo-ff-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000001;
+  pointer-events: none;
+}
+.hoohoo-ff-text {
+  font-family: 'Times New Roman', serif;
+  color: #ffd85a;
+  text-shadow: 0 2px 0 #000, 0 4px 12px rgba(0,0,0,0.6);
+  font-size: 6vh;
+  letter-spacing: 0.2em;
+  transform: scale(0.9) translateZ(0);
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+  animation: hoohoo-ff-text-in 0.6s cubic-bezier(.2,.9,.2,1) 0.4s forwards, hoohoo-ff-text-out 0.5s cubic-bezier(.4,0,.2,1) 1.2s forwards;
+}
+
+@keyframes hoohoo-ff-bar-top-in { from { transform: translate3d(0,-100%,0);} to { transform: translate3d(0,0,0);} }
+@keyframes hoohoo-ff-bar-bottom-in { from { transform: translate3d(0,100%,0);} to { transform: translate3d(0,0,0);} }
+@keyframes hoohoo-ff-bar-top-out { from { transform: translate3d(0,0,0);} to { transform: translate3d(0,-100%,0);} }
+@keyframes hoohoo-ff-bar-bottom-out { from { transform: translate3d(0,0,0);} to { transform: translate3d(0,100%,0);} }
+
+@keyframes hoohoo-ff-text-in { from { opacity: 0; transform: scale(0.9);} to { opacity: 1; transform: scale(1);} }
+@keyframes hoohoo-ff-text-out { from { opacity: 1; } to { opacity: 0; transform: scale(1.05);} }
+
