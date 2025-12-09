@@ -57,7 +57,7 @@
 
 /* Minimal flat form card */
 .form {
-  background: #1b0d0d;
+  background: #f1f1f1;
   border: 1px solid #e0e0e0;
   padding: 12px;
   border-radius: 6px;
@@ -133,7 +133,7 @@
   margin-top: 12px;
 }
 .form-submit {
-  background: #2f6fe0;
+  background: #0f1827;
   color: #fff;
   padding: 9px 12px;
   border-radius: 4px;
