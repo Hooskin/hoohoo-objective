@@ -2,6 +2,8 @@
   "id": "hoohoo-objective",
   "title": "HooHoo - Objective",
   "version": "1.0.0",
+  "url": "https://github.com/Hooskin/hoohoo-objective",
+  "download": "https://github.com/Hooskin/hoohoo-objective/archive/refs/heads/main.zip",
   "compatibility": {
     "minimum": "13",
     "verified": "13"
