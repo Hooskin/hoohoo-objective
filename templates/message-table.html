@@ -1,18 +1,17 @@
 <form class="form">
   <div class="form-group">
-    <label>Messages actuellement dans la table</label>
-    <div class="hoohoo-message-list">
+    <div class="hoohoo-message-list" aria-label="Liste des messages">
       {{#if messages}}
         {{#each messages}}
           <div class="hoohoo-message-row">
             <input class="hoohoo-message-input" type="text" value="{{this}}" />
-            <button class="hoohoo-remove-message">Supprimer</button>
+            <button class="hoohoo-remove-message" type="button" title="Supprimer" aria-label="Supprimer">✖</button>
           </div>
         {{/each}}
       {{else}}
         <div class="hoohoo-message-row">
           <input class="hoohoo-message-input" type="text" value="" placeholder="Aucun message, ajoutez-en un." />
-          <button class="hoohoo-remove-message">Supprimer</button>
+          <button class="hoohoo-remove-message" type="button" title="Supprimer" aria-label="Supprimer">✖</button>
         </div>
       {{/if}}
     </div>

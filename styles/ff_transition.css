@@ -51,3 +51,109 @@
 @keyframes hoohoo-ff-text-in { from { opacity: 0; transform: scale(0.9);} to { opacity: 1; transform: scale(1);} }
 @keyframes hoohoo-ff-text-out { from { opacity: 1; } to { opacity: 0; transform: scale(1.05);} }
 
+/* ==========================
+   Dialog / Message Table UI (Minimalist)
+   ========================== */
+
+/* Minimal flat form card */
+.form {
+  background: #1b0d0d;
+  border: 1px solid #e0e0e0;
+  padding: 12px;
+  border-radius: 6px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #111;
+  max-width: 760px;
+  width: 100%;
+  box-sizing: border-box;
+  pointer-events: auto;
+}
+
+.form .form-group > label { display: none; }
+
+.hoohoo-message-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 48vh;
+  overflow: auto;
+}
+
+.hoohoo-message-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.hoohoo-message-input {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 4px;
+  border: 1px solid #d0d0d0;
+  background: transparent;
+  color: #111;
+  font-size: 0.95rem;
+}
+.hoohoo-message-input::placeholder { color: #9a9a9a; }
+
+/* Compact flat remove button (max 50px) */
+.hoohoo-remove-message {
+  width: 40px;
+  height: 32px;
+  min-width: 40px;
+  border: 1px solid #d0d0d0;
+  background: transparent;
+  color: #444;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: 700;
+  padding: 0;
+}
+.hoohoo-remove-message:hover { background: #f2f2f2; }
+
+.hoohoo-add-message {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  border-radius: 4px;
+  background: transparent;
+  border: 1px solid #d0d0d0;
+  cursor: pointer;
+  font-weight: 700;
+  margin-top: 6px;
+}
+
+.form-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+.form-submit {
+  background: #2f6fe0;
+  color: #fff;
+  padding: 9px 12px;
+  border-radius: 4px;
+  border: 0;
+  cursor: pointer;
+  font-weight: 700;
+}
+.form-submit:hover { filter: brightness(0.98); }
+.form-cancel {
+  background: transparent;
+  border: 1px solid #d0d0d0;
+  padding: 9px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+@media (max-width: 520px) {
+  .form-buttons { flex-direction: column-reverse; }
+  .form-submit, .form-cancel { width: 100%; }
+  .hoohoo-message-row { flex-direction: row; align-items: center; }
+  .hoohoo-remove-message { width: 40px; }
+}
+
