@@ -1,0 +1,27 @@
+<form class="form">
+  <div class="form-group">
+    <label>Messages actuellement dans la table</label>
+    <div class="hoohoo-message-list">
+      {{#if messages}}
+        {{#each messages}}
+          <div class="hoohoo-message-row">
+            <input class="hoohoo-message-input" type="text" value="{{this}}" />
+            <button class="hoohoo-remove-message">Supprimer</button>
+          </div>
+        {{/each}}
+      {{else}}
+        <div class="hoohoo-message-row">
+          <input class="hoohoo-message-input" type="text" value="" placeholder="Aucun message, ajoutez-en un." />
+          <button class="hoohoo-remove-message">Supprimer</button>
+        </div>
+      {{/if}}
+    </div>
+  </div>
+  <div class="form-group">
+    <button type="button" class="hoohoo-add-message">Ajouter un message</button>
+  </div>
+  <div class="form-group form-buttons">
+    <button type="submit" class="form-submit">Enregistrer</button>
+    <button type="button" class="form-cancel" data-action="close">Annuler</button>
+  </div>
+</form>

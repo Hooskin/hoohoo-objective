@@ -1,9 +1,52 @@
 (() => {
+  console.log('hoohoo-objective | script loaded');
+  // Small helper UI: FormApplication to manage message table
+  class MessageTableApp extends FormApplication {
+    static get defaultOptions() {
+      return mergeObject(super.defaultOptions, {
+        id: 'hoohoo-message-table',
+        title: 'Gérer la table de messages - HooHoo Objective',
+        classes: ['sheet'],
+        template: 'modules/hoohoo-objective/templates/message-table.html',
+        width: 600
+      });
+    }
+
+    getData() {
+      const messages = game.settings.get('hoohoo-objective', 'messageTable') || [];
+      return { messages };
+    }
+
+    activateListeners(html) {
+      super.activateListeners(html);
+      html.find('.hoohoo-add-message').on('click', (ev) => {
+        ev.preventDefault();
+        const list = html.find('.hoohoo-message-list');
+        const newInput = $(`<div class="hoohoo-message-row"><input class="hoohoo-message-input" type="text" value="" placeholder="Nouveau message..." /><button class="hoohoo-remove-message">Supprimer</button></div>`);
+        list.append(newInput);
+        newInput.find('.hoohoo-remove-message').on('click', () => newInput.remove());
+      });
+
+      html.find('.hoohoo-remove-message').on('click', function(ev) {
+        ev.preventDefault();
+        $(this).closest('.hoohoo-message-row').remove();
+      });
+    }
+
+    async _updateObject(event, formData) {
+      const inputs = this.element.find('.hoohoo-message-input').toArray();
+      const messages = inputs.map(i => i.value?.trim()).filter(Boolean);
+      await game.settings.set('hoohoo-objective', 'messageTable', messages);
+      ui.notifications.info('Table de messages mise à jour.');
+    }
+  }
+
   // Register settings in init so they appear in the Module Settings
   Hooks.once('init', () => {
+    console.log('hoohoo-objective | init');
     game.settings.register('hoohoo-objective', 'enabled', {
-      name: 'hoohoo-objective.settings.enabled.name',
-      hint: 'hoohoo-objective.settings.enabled.hint',
+      name: 'Activer l\'animation Final Fantasy',
+      hint: 'Affiche une transition de type Final Fantasy lors de la création d\'une rencontre',
       scope: 'world',
       config: true,
       type: Boolean,
@@ -11,26 +54,26 @@
     });
 
     game.settings.register('hoohoo-objective', 'gmOnly', {
-      name: 'hoohoo-objective.settings.gmOnly.name',
-      hint: 'hoohoo-objective.settings.gmOnly.hint',
+      name: 'Visible uniquement par le MJ',
+      hint: 'Si activé, seuls les utilisateurs MJ verront l\'animation. Désactivé par défaut (visible par tous).',
       scope: 'client',
       config: true,
       type: Boolean,
-      default: true
+      default: false
     });
 
-    game.settings.register('hoohoo-objective', 'text', {
-      name: 'hoohoo-objective.settings.text.name',
-      hint: 'hoohoo-objective.settings.text.hint',
+    game.settings.register('hoohoo-objective', 'defaultText', {
+      name: 'Texte par défaut',
+      hint: 'Texte affiché si la table de messages est vide',
       scope: 'world',
       config: true,
       type: String,
-      default: 'BATTLE'
+      default: 'BATAILLE'
     });
 
     game.settings.register('hoohoo-objective', 'soundPath', {
-      name: 'hoohoo-objective.settings.soundPath.name',
-      hint: 'hoohoo-objective.settings.soundPath.hint',
+      name: 'Chemin du son (optionnel)',
+      hint: 'Chemin vers un fichier audio à jouer lors de la transition (ex: modules/monmodule/sounds/ff.wav)',
       scope: 'world',
       config: true,
       type: String,
@@ -38,20 +81,46 @@
     });
 
     game.settings.register('hoohoo-objective', 'volume', {
-      name: 'hoohoo-objective.settings.volume.name',
-      hint: 'hoohoo-objective.settings.volume.hint',
+      name: 'Volume du son',
+      hint: 'Volume du son de transition (0.0 - 1.0)',
       scope: 'client',
       config: true,
       type: Number,
       range: { min: 0, max: 1, step: 0.05 },
       default: 0.8
     });
+
+    // Store the message table as an Object (array)
+    game.settings.register('hoohoo-objective', 'messageTable', {
+      name: 'Table de messages',
+      hint: 'Liste des messages utilisés pour la transition (modifiable via le bouton Gérer).',
+      scope: 'world',
+      config: false,
+      type: Object,
+      default: ['BATAILLE']
+    });
+
+    // Register a menu button to open the message table manager (GM only)
+    try {
+      game.settings.registerMenu('hoohoo-objective', 'manageMessages', {
+        name: 'Gérer la table de messages',
+        label: 'Gérer',
+        hint: 'Ouvre une interface pour ajouter/supprimer les messages affichés lors d\'une rencontre',
+        icon: 'fas fa-list',
+        type: MessageTableApp,
+        restricted: true
+      });
+      console.log('hoohoo-objective | registerMenu OK');
+    } catch (err) {
+      console.error('hoohoo-objective | registerMenu failed', err);
+    }
   });
 
   Hooks.once('ready', () => {
-    console.log('hoohoo-objective | FF transition ready');
+    console.log('hoohoo-objective | ready');
 
     const showTransition = (text) => {
+      console.log('hoohoo-objective | showTransition', text);
       try {
         if (typeof document === 'undefined') return;
         const overlay = document.createElement('div');
@@ -63,42 +132,63 @@
         `;
         document.body.appendChild(overlay);
 
-        // Use a single timeout cleanup after the full animation duration to avoid
-        // prematurely removing the overlay when one animation finishes.
         const totalMs = 2800; // matches CSS timings + small buffer
         setTimeout(() => {
           try { if (overlay && overlay.parentElement) overlay.remove(); } catch (e) {}
         }, totalMs);
       } catch (err) {
-        // Don't throw, keep Foundry flow working
         console.error('hoohoo-objective | FF transition error', err);
       }
     };
 
     const playSoundIfConfigured = () => {
       try {
+        console.log('hoohoo-objective | playSoundIfConfigured');
         const path = game.settings.get('hoohoo-objective', 'soundPath');
         const volume = game.settings.get('hoohoo-objective', 'volume') ?? 0.8;
-        if (!path || path === '') return;
-        // Play the configured sound path (module author may provide a packaged default)
+        if (!path || path === '') {
+          console.log('hoohoo-objective | no soundPath configured');
+          return;
+        }
+        console.log('hoohoo-objective | playing sound', path, volume);
         AudioHelper.play({src: path, volume: volume, loop: false}, false);
       } catch (e) {
-        // ignore missing file or play errors
+        console.error('hoohoo-objective | playSound error', e);
       }
     };
 
-    // Listen to combatStart (triggered when pressing "Begin Combat") instead of createCombat
-    Hooks.on('combatStart', (combat, updateData, options) => {
-      const enabled = game.settings.get('hoohoo-objective', 'enabled');
-      if (!enabled) return;
+    // Trigger when an encounter is created
+    Hooks.on('createCombat', (combat, options, userId) => {
+      try {
+        console.log('hoohoo-objective | createCombat triggered', {combatId: combat?.id, userId, options});
+        const enabled = game.settings.get('hoohoo-objective', 'enabled');
+        console.log('hoohoo-objective | enabled =', enabled);
+        if (!enabled) {
+          console.log('hoohoo-objective | disabled by settings');
+          return;
+        }
 
-      const gmOnly = game.settings.get('hoohoo-objective', 'gmOnly');
-      if (gmOnly && !game.user?.isGM) return;
+        const gmOnly = game.settings.get('hoohoo-objective', 'gmOnly');
+        console.log('hoohoo-objective | gmOnly =', gmOnly, 'currentUserIsGM =', game.user?.isGM);
+        if (gmOnly && !game.user?.isGM) {
+          console.log('hoohoo-objective | skipping for non-GM client');
+          return;
+        }
 
-      const text = game.settings.get('hoohoo-objective', 'text') || 'BATTLE';
+        const table = game.settings.get('hoohoo-objective', 'messageTable') || [];
+        const defaultText = game.settings.get('hoohoo-objective', 'defaultText') || 'BATAILLE';
+        let text = defaultText;
+        if (Array.isArray(table) && table.length > 0) {
+          text = table[Math.floor(Math.random() * table.length)];
+        }
 
-      showTransition(text);
-      playSoundIfConfigured();
+        console.log('hoohoo-objective | chosen text =', text);
+
+        showTransition(text);
+        playSoundIfConfigured();
+      } catch (err) {
+        console.error('hoohoo-objective | createCombat handler error', err);
+      }
     });
   });
 })();
