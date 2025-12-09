@@ -157,10 +157,10 @@
       }
     };
 
-    // Trigger when an encounter is created
-    Hooks.on('createCombat', (combat, options, userId) => {
+    // Trigger when the encounter is started (Begin Encounter)
+    Hooks.on('combatStart', (combat, updateData, options) => {
       try {
-        console.log('hoohoo-objective | createCombat triggered', {combatId: combat?.id, userId, options});
+        console.log('hoohoo-objective | combatStart triggered', {combatId: combat?.id, updateData, options});
         const enabled = game.settings.get('hoohoo-objective', 'enabled');
         console.log('hoohoo-objective | enabled =', enabled);
         if (!enabled) {
@@ -177,15 +177,50 @@
 
         const table = game.settings.get('hoohoo-objective', 'messageTable') || [];
         const defaultText = game.settings.get('hoohoo-objective', 'defaultText') || 'BATAILLE';
-        let text = defaultText;
-        if (Array.isArray(table) && table.length > 0) {
-          text = table[Math.floor(Math.random() * table.length)];
-        }
+        // Build a dialog with a dropdown populated from the message table
+        const optionsHtml = (Array.isArray(table) && table.length > 0)
+          ? table.map((m, i) => `<option value="${i}">${m}</option>`).join('\n')
+          : `<option value="-1">${defaultText}</option>`;
 
-        console.log('hoohoo-objective | chosen text =', text);
+        const content = `
+          <div class="form-group">
+            <label>Sélectionnez le message pour la transition</label>
+            <div class="form-fields">
+              <select name="messageChoice">${optionsHtml}</select>
+            </div>
+          </div>`;
 
-        showTransition(text);
-        playSoundIfConfigured();
+        new Dialog({
+          title: 'Begin Encounter — Choix du message',
+          content,
+          buttons: {
+            ok: {
+              icon: '<i class="fas fa-check"></i>',
+              label: 'Valider',
+              callback: (html) => {
+                try {
+                  const val = html.find('select[name="messageChoice"]').val();
+                  let text = defaultText;
+                  if (val !== undefined && parseInt(val) >= 0 && Array.isArray(table) && table.length > 0) {
+                    const idx = parseInt(val);
+                    if (!Number.isNaN(idx) && table[idx] !== undefined) text = table[idx];
+                  }
+                  console.log('hoohoo-objective | dialog selection =', text);
+                  showTransition(text);
+                  playSoundIfConfigured();
+                } catch (e) {
+                  console.error('hoohoo-objective | dialog ok callback error', e);
+                }
+              }
+            },
+            cancel: {
+              icon: '<i class="fas fa-times"></i>',
+              label: 'Annuler',
+              callback: () => { console.log('hoohoo-objective | dialog cancelled'); }
+            }
+          },
+          default: 'ok'
+        }).render(true);
       } catch (err) {
         console.error('hoohoo-objective | createCombat handler error', err);
       }
